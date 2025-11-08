@@ -1,0 +1,65 @@
+[
+    {
+        "geometry": {
+            "location": {
+                "lat": 25.74008,
+                "lng": -100.31825
+            },
+            "viewport": {
+                "northeast": {
+                    "lat": 25.74010,
+                    "lng": -100.31809
+                },
+                "southwest": {
+                    "lat": 25.74001,
+                    "lng": -100.31826
+                }
+            }
+        },
+        "name": "Mi Casa",
+        "rating": 4.2,
+        "vicinity": "Lorenzo Barcelata #477, Lomas del Roble, San Nicolás de los Garza, N.L."
+    },
+    {
+        "geometry": {
+            "location": {
+                "lat": 25.72559,
+                "lng": -100.31518
+            },
+            "viewport": {
+                "northeast": {
+                    "lat": 25.725873,
+                    "lng": -100.314822
+                },
+                "southwest": {
+                    "lat": 25.725241,
+                    "lng": -100.315714
+                }
+            }
+        },
+        "name": "FCFM",
+        "rating": 4.2,
+        "vicinity": "Pedro de Alba, Niños Héroes, Ciudad Universitaria, 66451, San Nicolás de los Garza, N.L."
+    },
+    {
+        "geometry": {
+            "location": {
+                "lat": 25.72829,
+                "lng": -100.30850
+            },
+            "viewport": {
+                "northeast": {
+                    "lat": 25.762845,
+                    "lng": -100.30853
+                },
+                "southwest": {
+                    "lat": 25.727058,
+                    "lng": -100.309778
+                }
+            }
+        },
+        "name": "FACPYA",
+        "rating": 4.2,
+        "vicinity": "FACPYA, Pedro de Alba, Niños Héroes, Ciudad Universitaria, 66451, San Nicolás de los Garza, N.L."
+    }
+]

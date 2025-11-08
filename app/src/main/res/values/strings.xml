@@ -1,0 +1,26 @@
+<!--
+ Copyright 2020 Google LLC
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<resources>
+  <string name="app_name">BuildYourFirstMap</string>
+  <string name="default_web_client_id">766813132621-c11b37sstv28mgps70dbkgoo3qtsmfb2.apps.googleusercontent.com</string>
+  <string name="sign_in">Sign In</string>
+  <string name="addScore">Añadir puntaje</string>
+  <string name="incrementar_rating">Incrementar rating</string>
+  <string name="reducir_rating">Reducir rating</string>
+  <string name="scoresSheetUrl">https://script.google.com/macros/s/AKfycbzAdqPq7hbCiR-Ihv_ydb051QFlbwNYu6x415vJGV6AV-1U-CVQZCtAGo5tly7wnjJ6/exec</string>
+  <string name="placesFirestore">places</string>
+</resources>
