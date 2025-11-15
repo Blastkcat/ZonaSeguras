@@ -1,10 +1,10 @@
 package com.fcfm.agosto.aplicacionesmoviles
 
 import android.content.Intent
-import android.credentials.CredentialManager
-import android.credentials.CredentialOption
-
-import android.credentials.GetCredentialRequest
+import androidx.credentials.CredentialManager
+import androidx.credentials.CredentialOption
+import androidx.credentials.exceptions.GetCredentialException
+import androidx.credentials.GetCredentialRequest
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -71,7 +71,7 @@ class MainActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
 
 
-        credentialManager= CredentialManager.create(this);
+        credentialManager = CredentialManager.create(this)
 
         findViewById<Button>(R.id.signIn).setOnClickListener {
             if (auth.currentUser != null) {
@@ -79,6 +79,7 @@ class MainActivity : AppCompatActivity() {
             } else {
                 signIn()
             }
+            loadPlacesAndMap()
         }
 
 
@@ -111,7 +112,9 @@ class MainActivity : AppCompatActivity() {
                 val placesList = placesReader.read()
                 places.clear()
                 places.addAll(placesList)
-                setupMap()
+                withContext(Dispatchers.Main) {
+                    setupMap()
+                }
 
             }
             catch (e: Exception){
@@ -374,7 +377,7 @@ class MainActivity : AppCompatActivity() {
             try {
                 val googleIdOption = GetGoogleIdOption.Builder()
                     .setFilterByAuthorizedAccounts(false)
-                    .setServerClientId(R.string.default_web_client_id.toString())
+                    .setServerClientId(getString(R.string.default_web_client_id))
                     .build();
 
                 val request = GetCredentialRequest.Builder()
