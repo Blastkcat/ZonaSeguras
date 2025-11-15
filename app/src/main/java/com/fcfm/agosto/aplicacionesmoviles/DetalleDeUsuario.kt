@@ -1,21 +1,23 @@
-package com.fcfm.agosto.aplicacionesmoviles
-
-import androidx.credentials.exceptions.ClearCredentialException
 import android.content.Intent
-import android.credentials.ClearCredentialStateRequest
-import android.credentials.CredentialManager
-import android.os.Build
 import android.os.Bundle
+import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.credentials.ClearCredentialStateRequest
+import androidx.credentials.CredentialManager
 import androidx.lifecycle.lifecycleScope
+import coil.load
+import coil.transform.CircleCropTransformation
+import com.fcfm.agosto.aplicacionesmoviles.MainActivity
+import com.fcfm.agosto.aplicacionesmoviles.R
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
+
 
 class DetalleDeUsuario : AppCompatActivity() {
 
@@ -31,18 +33,28 @@ class DetalleDeUsuario : AppCompatActivity() {
             insets
         }
         findViewById<TextView>(R.id.username).text = auth.currentUser?.email
-    }
-/*
-    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-    fun signOut() {
 
-        lifecycleScope.launch() {
-            auth.signOut()
-            val credentialManager =
-                androidx.credentials.CredentialManager.create(this@DetalleDeUsuario);
-            var clearRequest = ClearCredentialStateRequest(GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL)
-            credentialManager.clearCredentialState()
-            startActivity(Intent(this@DetalleDeUsuario, MainActivity::class.java))
+        findViewById<ImageView>(R.id.profilePicture).load(auth.currentUser?.photoUrl) {
+            crossfade(true)
+            transformations(CircleCropTransformation())
         }
-    }*/
+
+        findViewById<Button>(R.id.signOut).setOnClickListener {
+            signOut()
+        }
+    }
+
+    fun signOut() {
+        lifecycleScope.launch() {
+            auth.signOut();
+
+            val credentialManager = CredentialManager.create(this@DetalleDeUsuario);
+            val clearRequest = ClearCredentialStateRequest(GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL);
+            credentialManager.clearCredentialState(clearRequest);
+
+            startActivity(Intent(this@DetalleDeUsuario, MainActivity::class.java))
+
+            finish();
+        }
+    }
 }

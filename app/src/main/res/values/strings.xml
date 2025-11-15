@@ -16,7 +16,7 @@
 
 <resources>
   <string name="app_name">BuildYourFirstMap</string>
-  <string name="default_web_client_id">766813132621-c11b37sstv28mgps70dbkgoo3qtsmfb2.apps.googleusercontent.com</string>
+  <string name="default_web_client_id">766813132621-a7okp53n5d3021itigs9t1m6patihc7p.apps.googleusercontent.com</string>
   <string name="sign_in">Sign In</string>
   <string name="addScore">Añadir puntaje</string>
   <string name="incrementar_rating">Incrementar rating</string>

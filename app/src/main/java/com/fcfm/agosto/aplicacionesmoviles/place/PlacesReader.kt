@@ -13,13 +13,13 @@
 // limitations under the License.
 
 package com.fcfm.agosto.aplicacionesmoviles.place
-
 import android.content.Context
 import com.fcfm.agosto.aplicacionesmoviles.R
+import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.tasks.await
-
+import kotlin.String
 class PlacesReader(private val context: Context) {
 
     private val db = Firebase.firestore
@@ -28,5 +28,27 @@ class PlacesReader(private val context: Context) {
         val results = db.collection(R.string.placesFirestore.toString()).get().await();
         val placesResponse = results.documents.mapNotNull { it.toObject(PlaceResponse::class.java) }
         return placesResponse.map { it.toPlace() }
+    }
+
+    fun addPlace(name: String, latLng: LatLng, address: String, rating: Float) {
+        val geometryLocationMap = hashMapOf(
+            "lat" to latLng.latitude,
+            "lng" to latLng.longitude
+        )
+
+        val geometryMap = hashMapOf(
+            "location" to geometryLocationMap
+        )
+
+        val placeMap = hashMapOf(
+            "id" to java.util.UUID.randomUUID().toString(),
+            "geometry" to geometryMap,
+            "name" to name,
+            "vicinity" to address,
+            "rating" to rating
+        )
+
+        db.collection(R.string.placesFirestore.toString())
+            .add(placeMap);
     }
 }

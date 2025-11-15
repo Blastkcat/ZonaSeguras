@@ -2,6 +2,7 @@ package com.fcfm.agosto.aplicacionesmoviles
 
 import android.content.Intent
 import android.credentials.CredentialManager
+import android.credentials.CredentialOption
 
 import android.credentials.GetCredentialRequest
 import android.graphics.Color
@@ -13,15 +14,13 @@ import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
+
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.fcfm.agosto.aplicacionesmoviles.place.Place
 import com.fcfm.agosto.aplicacionesmoviles.place.PlacesReader
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
@@ -40,13 +39,23 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.io.InputStream
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import androidx.lifecycle.lifecycleScope
+
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+
+
+
+
 class MainActivity : AppCompatActivity() {
 
     private val places: MutableList<Place> = mutableListOf()
     private lateinit var auth: FirebaseAuth
-    private lateinit var client: GoogleSignInClient
 
     private lateinit var credentialManager: CredentialManager
+    private var placesReader = PlacesReader(this@MainActivity);
 
     private var user: FirebaseUser? = null
 
@@ -54,21 +63,23 @@ class MainActivity : AppCompatActivity() {
     private var geoJsonLayer: GeoJsonLayer? = null
 
 
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         auth = FirebaseAuth.getInstance()
-        //setupGoogleSignIn()
-        /*
-        credentialManager= CredentialManager.equals(this)
+
+
+        credentialManager= CredentialManager.create(this);
 
         findViewById<Button>(R.id.signIn).setOnClickListener {
             if (auth.currentUser != null) {
                 startActivity(Intent(this, DetalleDeUsuario::class.java))
             } else {
                 signIn()
-            }*/
+            }
+        }
 
 
         val buscador = findViewById<EditText>(R.id.editTextText)
@@ -89,32 +100,21 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        loadPlacesAndMap()
+
     }
 
-    // 🔹 Configurar inicio de sesión de Google
-    private fun setupGoogleSignIn() {
-        val options = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.default_web_client_id))
-            .requestEmail()
-            .build()
-        client = GoogleSignIn.getClient(this, options)
-    }
 
     // 🔹 Cargar los lugares y el mapa
-    private fun loadPlacesAndMap() {
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                val placesList = PlacesReader(this@MainActivity).read()
+    private fun loadPlacesAndMap(){
+        lifecycleScope.launch(Dispatchers.IO){
+            try{
+                val placesList = placesReader.read()
+                places.clear()
+                places.addAll(placesList)
+                setupMap()
 
-                withContext(Dispatchers.Main) {
-                    if (!isDestroyed) {
-                        places.clear()
-                        places.addAll(placesList)
-                        setupMap()
-                    }
-                }
-            } catch (e: Exception) {
+            }
+            catch (e: Exception){
                 Log.e("Firestore", "Error loading places", e)
             }
         }
@@ -353,48 +353,7 @@ class MainActivity : AppCompatActivity() {
 
 
 
-    // 🔹 Google Sign-In
-    private val signInHandler = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        try {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-            val account = task.getResult(Exception::class.java)
-            account?.idToken?.let { signInWithGoogle(it) }
-                ?: Log.w("AUTH", "Google Sign-In failed: No ID Token")
-        } catch (e: Exception) {
-            Log.e("AUTH", "Google Sign-In error", e)
-        }
-    }
-    /*
-    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-    private fun signIn() {
-        //signInHandler.launch(client.signInIntent)
-        CoroutineScope(Dispatchers.Main).launch{
-            try {
-                val googleIdOption= GetGoogleIdOption.Builder()
-                    .setFilterByAuthorizedAccounts(false)
-                    .setServerClientId(R.string.default_web_client_id.toString())
-                    .build()
-                val request= GetCredentialRequest.Builder()
-                    .addCredentialOption(googleIdOption)
-                    .build()
 
-
-                val result=credentialManager.getCredential(this@MainActivity,request)
-                val credential=result.credential;
-                val googleIdToken=GoogleIdTokenCredentials.createFrom(credential.data);
-                signInWithGoogle(googleIdToken.token)
-
-
-
-
-            }catch (e: Exception){
-                Log.e("AUTH", "Google Sign-In error", e)
-            }
-
-        }
-    }*/
 
     private fun signInWithGoogle(tokenId: String) {
         val credential = GoogleAuthProvider.getCredential(tokenId, null)
@@ -409,6 +368,32 @@ class MainActivity : AppCompatActivity() {
                 }
             }
     }
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    private fun signIn() {
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                val googleIdOption = GetGoogleIdOption.Builder()
+                    .setFilterByAuthorizedAccounts(false)
+                    .setServerClientId(R.string.default_web_client_id.toString())
+                    .build();
+
+                val request = GetCredentialRequest.Builder()
+                    .addCredentialOption(googleIdOption)
+                    .build();
+
+                val result = credentialManager.getCredential(this@MainActivity, request);
+
+                val credential = result.credential;
+                val googleIdToken = GoogleIdTokenCredential.createFrom(credential.data);
+                signInWithGoogle(googleIdToken.idToken);
+            } catch (e: GetCredentialException) {
+                Log.w("AUTH", "Credential error", e)
+            }
+        }
+    }
+
+
+
 
 
 }

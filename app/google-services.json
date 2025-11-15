@@ -7,12 +7,20 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:766813132621:android:1c5650e2a7ebfab51e4904",
+        "mobilesdk_app_id": "1:766813132621:android:73844b4891fb320f1e4904",
         "android_client_info": {
           "package_name": "com.fcfm.agosto.aplicacionesmoviles"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "766813132621-a7okp53n5d3021itigs9t1m6patihc7p.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.fcfm.agosto.aplicacionesmoviles",
+            "certificate_hash": "bcad8dd25d238d7c71f14127273ed419a7f436ed"
+          }
+        },
         {
           "client_id": "766813132621-c11b37sstv28mgps70dbkgoo3qtsmfb2.apps.googleusercontent.com",
           "client_type": 3
