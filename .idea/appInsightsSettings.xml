@@ -1,6 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="AppInsightsSettings">
-    <option name="selectedTabId" value="Firebase Crashlytics" />
+      <option name="selectedTabId" value="Android Vitals" />
+      <option name="tabSettings">
+          <map>
+              <entry key="Firebase Crashlytics">
+                  <value>
+                      <InsightsFilterSettings>
+                          <option name="connection">
+                              <ConnectionSetting>
+                                  <option name="appId" value="com.fcfm.agosto.aplicacionesmoviles" />
+                                  <option name="mobileSdkAppId" value="1:766813132621:android:73844b4891fb320f1e4904" />
+                                  <option name="projectId" value="aplicaciones-moviles-2025-fcfm" />
+                                  <option name="projectNumber" value="766813132621" />
+                              </ConnectionSetting>
+                          </option>
+                          <option name="failureTypes">
+                              <list>
+                                  <option value="FATAL" />
+                              </list>
+                          </option>
+                          <option name="signal" value="SIGNAL_UNSPECIFIED" />
+                          <option name="timeIntervalDays" value="THIRTY_DAYS" />
+                          <option name="visibilityType" value="ALL" />
+                      </InsightsFilterSettings>
+                  </value>
+              </entry>
+          </map>
+      </option>
   </component>
 </project>

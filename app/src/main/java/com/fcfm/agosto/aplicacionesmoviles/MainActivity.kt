@@ -1,5 +1,7 @@
 package com.fcfm.agosto.aplicacionesmoviles
 
+import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Intent
 import androidx.credentials.CredentialManager
 import androidx.credentials.CredentialOption
@@ -10,6 +12,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
+import android.view.LayoutInflater
 import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
@@ -41,10 +44,18 @@ import org.json.JSONObject
 import java.io.InputStream
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import androidx.lifecycle.lifecycleScope
-
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-
+import android.widget.NumberPicker
+import android.widget.TextView
+import com.fcfm.agosto.aplicacionesmoviles.scores.Score
+import com.fcfm.agosto.aplicacionesmoviles.scores.ScoresReader
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 
 
@@ -61,6 +72,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var map: GoogleMap
     private var geoJsonLayer: GeoJsonLayer? = null
+    private val db = Firebase.firestore
 
 
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
@@ -113,7 +125,9 @@ class MainActivity : AppCompatActivity() {
                 places.clear()
                 places.addAll(placesList)
                 withContext(Dispatchers.Main) {
-                    setupMap()
+                    withContext(Dispatchers.Main) {
+                        setupMap()
+                    }
                 }
 
             }
@@ -124,6 +138,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     // 🔹 Configurar el mapa
+    @SuppressLint("PotentialBehaviorOverride")
     private fun setupMap() {
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as? SupportMapFragment
@@ -137,6 +152,93 @@ class MainActivity : AppCompatActivity() {
 
 
             setupSearch()
+        }
+
+        mapFragment?.getMapAsync { map ->
+            map.setOnMapLongClickListener { latLng ->
+                val view = LayoutInflater.from(this).inflate(R.layout.new_place_form, null)
+                val newTitle = view.findViewById<EditText>(R.id.new_title)
+                val newAddress = view.findViewById<EditText>(R.id.new_address)
+                val newRatingSelector = view.findViewById<NumberPicker>(R.id.new_rating)
+                newRatingSelector.maxValue = 5
+                newRatingSelector.minValue = 0
+
+                AlertDialog.Builder(this)
+                    .setTitle("New Place")
+                    .setView(view)
+                    .setPositiveButton("Agregar") { _, _, ->
+                        val title = newTitle.text.toString().ifBlank { "Default Title" }
+                        val address = newAddress.text.toString().ifBlank { "Default Address" }
+                        val rating = newRatingSelector.value.toFloat();
+
+                        placesReader.addPlace(title, latLng, address, rating);
+
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            try {
+                                val placesList = placesReader.read()
+                                places.clear()
+                                places.addAll(placesList)
+                                withContext(Dispatchers.Main) {
+                                    addMarkers(map)
+                                }
+                            } catch (e: Exception) {
+                                Log.e("Firestore", "Error loading places", e)
+                            }
+                        }
+                    }
+                    .setNegativeButton("Cancelar", null)
+                    .show()
+
+            }
+
+            map.setOnMarkerClickListener { marker ->
+                val place = marker.tag as? Place ?: return@setOnMarkerClickListener false
+                val view = LayoutInflater.from(this).inflate(R.layout.marker_popup, null)
+                val title = view.findViewById<TextView>(R.id.marker_popup_title)
+                title.text = place.name
+                val address = view.findViewById<TextView>(R.id.marker_popup_address)
+                address.text = place.address
+                val newRatingSelector = view.findViewById<NumberPicker>(R.id.marker_popup_rating)
+                newRatingSelector.maxValue = 5
+                newRatingSelector.minValue = 0
+                newRatingSelector.value = place.rating.toInt()
+
+                AlertDialog.Builder(this)
+                    .setTitle("Place Information")
+                    .setView(view)
+                    .setPositiveButton("Editar") { _, _, ->
+                        val rating = newRatingSelector.value.toFloat();
+
+                        if (auth.currentUser != null) {
+                            val currentTime =
+                                SimpleDateFormat("yyyy-mm-dd hh:mm:ss", Locale.getDefault())
+                            currentTime.timeZone = TimeZone.getTimeZone("UTC")
+                            val currentTimeInUTC = currentTime.format(Date())
+                            val score =
+                                Score(place.id, auth.currentUser?.email!!, rating, currentTimeInUTC)
+
+                            lifecycleScope.launch(Dispatchers.IO) {
+                                val scoresReader = ScoresReader(this@MainActivity)
+                                val newScore = scoresReader.doPost(score)
+                                withContext(Dispatchers.Main) {
+                                    place.rating = newScore
+                                }
+                            }
+
+                        }
+                        newRatingSelector.value = place.rating.toInt()
+
+                        db.collection(getString(R.string.placesFirestore)).document(place.id).set(place)
+                    }
+                    .setNegativeButton("Cancelar", null)
+                    .show()
+
+                true
+            }
+
+            addMarkers(map)
+
+            //map.setInfoWindowAdapter(MarkerPopupAdapter(this))
         }
 
     }

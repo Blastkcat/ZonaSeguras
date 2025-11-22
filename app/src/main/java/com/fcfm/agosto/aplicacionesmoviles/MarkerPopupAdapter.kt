@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
+import android.util.Log
 
 class MarkerPopupAdapter(
     private val context: Context
@@ -27,6 +28,7 @@ class MarkerPopupAdapter(
     private var rating: Float? = null
 
     private val db = Firebase.firestore
+    private lateinit var ratingText: TextView
 
     override fun getInfoContents(marker: Marker): View? {
         auth = FirebaseAuth.getInstance()
@@ -37,18 +39,7 @@ class MarkerPopupAdapter(
         val view = LayoutInflater.from(context).inflate(
             R.layout.marker_popup, null
         )
-        view.findViewById<TextView>(R.id.marker_popup_title).text = place.name
-        view.findViewById<TextView>(R.id.marker_popup_address).text = place.address
-        view.findViewById<TextView>(R.id.marker_popup_rating).text = "Puntuación: %.2f".format(rating)
-        view.findViewById<Button>(R.id.addScore).setOnClickListener {
-            addScore(place)
-        }
-        view.findViewById<MaterialButton>(R.id.increaseScore).setOnClickListener {
-            increaseRating()
-        }
-        view.findViewById<MaterialButton>(R.id.reduceScore).setOnClickListener {
-            decreaseRating()
-        }
+
 
         return view
     }
@@ -65,7 +56,7 @@ class MarkerPopupAdapter(
         val newScore = scoresReader.doPost(score)
         place.rating = newScore
 
-        db.collection(R.string.placesFirestore.toString()).document(place.id).set(place)
+        db.collection(context.getString(R.string.placesFirestore)).document(place.id).set(place)
     }
 
     fun increaseRating(): Float {
